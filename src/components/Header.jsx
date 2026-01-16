@@ -1,4 +1,6 @@
-const Header = ({ score = 0, best = 0 }) => {
+import "../styles/tailwind.css";
+
+const Header = ({ score = 0, best = 0, handleReset }) => {
   return (
     <div>
       <div>
@@ -13,6 +15,7 @@ const Header = ({ score = 0, best = 0 }) => {
       <div>
         <b>Score: {score}</b>
         <b>Best Score: {best}</b>
+        <button onClick={handleReset}>Reset Game</button>
       </div>
     </div>
   );

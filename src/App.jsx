@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import "./styles/tailwind.css";
 import Cards from "./components/Cards";
 import Header from "./components/Header";
 
@@ -14,20 +14,32 @@ function App() {
   const [bestScore, setBestScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
+  function getRandomIds(count, max) {
+    const ids = new Set();
+
+    while (ids.size < count) {
+      ids.add(Math.floor(Math.random() * max) + 1);
+    }
+
+    return [...ids];
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=4");
-        const data = await res.json();
+        const randomIds = getRandomIds(24, 1025);
 
-        const details = await Promise.all(
-          data.results.map(async (entity) => {
-            const res = await fetch(entity.url);
+        // const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=4");
+        // const data = await res.json();
+
+        const pokemonData = await Promise.all(
+          randomIds.map(async (id) => {
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
             return res.json();
           })
         );
 
-        setCards(shuffle(details));
+        setCards(shuffle(pokemonData));
       } catch (error) {
         console.log("Error fetching data", error);
       }
@@ -40,21 +52,25 @@ function App() {
     if (clickedCards.includes(id)) {
       setScore(0);
       setClickedCards([]);
-    } else {
-      const currentScore = score + 1;
-      setScore(currentScore);
-      setClickedCards([...clickedCards, id]);
-
-      if (currentScore > bestScore) setBestScore(currentScore);
-      winCheck();
+      setGameOver(false);
+      setCards((prev) => shuffle(prev));
+      return;
     }
 
-    setCards(shuffle(cards));
-  }
+    setClickedCards((prev) => {
+      const updatedArr = [...prev, id];
+      if (updatedArr.length === cards.length) setGameOver(true);
 
-  function winCheck() {
-    if (clickedCards.length === cards.length) setGameOver(true);
-    return;
+      return updatedArr;
+    });
+
+    setScore((prev) => {
+      const currentScore = prev + 1;
+      setBestScore((best) => Math.max(best, currentScore));
+      return currentScore;
+    });
+
+    setCards((prev) => shuffle(prev));
   }
 
   function resetGame() {
@@ -65,17 +81,18 @@ function App() {
   }
 
   return (
-    <>
-      <Header score={score} best={bestScore} />
+    <div className="container bg-gray-200 flex flex-col m-auto justify-center">
+      <Header score={score} best={bestScore} handleReset={resetGame} />
+
       {gameOver ? (
         <div>
-          <h1>You Win!</h1>
+          <h1 className="text-4xl font-bold text-blue-500">You Win! 🎉</h1>
           <button onClick={resetGame}>Play Again</button>
         </div>
       ) : (
         <Cards cards={cards} onClick={handleCardClick} />
       )}
-    </>
+    </div>
   );
 }
 
