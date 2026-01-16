@@ -81,13 +81,15 @@ function App() {
   }
 
   return (
-    <div className="container bg-gray-200 flex flex-col m-auto justify-center">
+    <div className="flex flex-col bg-blue-200 min-w-full min-h-screen m-auto">
       <Header score={score} best={bestScore} handleReset={resetGame} />
 
       {gameOver ? (
-        <div>
-          <h1 className="text-4xl font-bold text-blue-500">You Win! 🎉</h1>
-          <button onClick={resetGame}>Play Again</button>
+        <div className="flex flex-col items-center gap-8 p-8">
+          <h1 className="text-3xl md:text-5xl font-bold">You Win! 🎉</h1>
+          <button className="border-blue-500 border-4 rounded-2xl text-xl md:text-2xl bg-blue-100 hover:bg-blue-200 p-4 cursor-pointer transition-colors" onClick={resetGame}>
+            Play Again
+          </button>
         </div>
       ) : (
         <Cards cards={cards} onClick={handleCardClick} />
